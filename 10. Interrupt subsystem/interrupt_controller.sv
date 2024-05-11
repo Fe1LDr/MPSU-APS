@@ -27,7 +27,7 @@ end
 
 always_ff @(posedge clk_i) begin
     if (rst_i) irq_h <= 0;
-    else       irq_h <= ~(~exc_exception & mret_i) & (irq_h ^ irq_o);
+    else       irq_h <= ~(~exc_exception & mret_i) & (irq_h | irq_o);
 end
 
 assign irq_ret_o   = ~exc_exception & mret_i;
