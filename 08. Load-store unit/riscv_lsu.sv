@@ -70,7 +70,7 @@ always_comb begin
                         3: core_rd_o = {{24{1'b0}}, mem_rd_i[31:24]};
                     endcase
                 end
-        default: mem_wd_o = core_wd_i;
+        default: core_rd_o = mem_rd_i;
     endcase
 end
 
