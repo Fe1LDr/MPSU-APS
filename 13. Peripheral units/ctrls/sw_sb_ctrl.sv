@@ -21,6 +21,7 @@ always_ff @(posedge clk_i) begin
     else begin
         sw_temp <= sw_i;
         if (sw_temp != sw_i) interrupt_request_o <= 1'b1;
+        if (interrupt_return_i) interrupt_request_o <= 1'b0;
     end
 end
 
@@ -28,10 +29,6 @@ always_ff @(posedge clk_i) begin
     if (req_i & ~write_enable_i & addr_i == 32'b0) begin
         read_data_o = {{16{1'b0}}, sw_temp};
     end
-end
-
-always_ff @(posedge clk_i) begin
-    if (interrupt_return_i) interrupt_request_o = 1'b0;
 end
     
 endmodule
