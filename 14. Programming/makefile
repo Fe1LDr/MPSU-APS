@@ -6,6 +6,8 @@ VERILOG=verilog --verilog-data-width=4
 OBJECTS=$(OUTPUT)/main.o $(OUTPUT)/startup.o
 OUTPUT=output
 
+TARGET=programms/main18.c
+
 all: init disasm
 
 init: result.elf
@@ -21,8 +23,8 @@ result.elf: startup.o main.o
 startup.o: startup.S
 	$(CC)-gcc -c $(RVFLAGS) startup.S -o $(OUTPUT)/startup.o
 
-main.o: main.c
-	$(CC)-gcc -c $(RVFLAGS) main.c -o $(OUTPUT)/main.o
+main.o: $(TARGET)
+	$(CC)-gcc -c $(RVFLAGS) $(TARGET) -o $(OUTPUT)/main.o
 
 clean:
 	del /s /q $(OUTPUT)

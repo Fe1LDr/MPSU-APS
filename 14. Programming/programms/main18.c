@@ -20,6 +20,9 @@ void draw(uint32_t *row, uint32_t *col, char c);
 void clear();
 void int_handler();
 
+uint32_t scan_code_reg = 0;
+uint32_t scan_code_is_unread = 0;
+
 int main(int argc, char** argv)
 {
     uint32_t row = 0;
@@ -36,66 +39,55 @@ int main(int argc, char** argv)
         a = get_number(&row, &col); row++; col = 0;
         draw_result(&row, &col);
         answer = count_ocur(sw_i, a);
-        draw(&row, &col, '0' + answer);
+        draw(&row, &col, '0' + answer); row++; col = 0;
     }
 }
 
 uint32_t get_scan_code() {
-    uint32_t wait_cycles = 0;
-    while (!ps2_ptr->unread_data && wait_cycles < MAX_WAIT_CYCLES) {
-        wait_cycles++;
-    }
-    if (ps2_ptr->unread_data) {
-        return ps2_ptr->scan_code;
+    while (!scan_code_is_unread) { }
+    if (scan_code_is_unread) {
+        scan_code_is_unread = 0;
+        return scan_code_reg;
     } else {
         return 0;
     }
 }
 
-#if 0
 uint32_t get_number(uint32_t *row, uint32_t *col) {
     uint32_t number = 0;
     uint32_t temp = 0;
-    uint32_t scan_code = get_scan_code();
-    while (scan_code != 0x5A) {
-        draw(row, col, temp);
-        number = number * 10 + temp;
-        scan_code = get_scan_code();
-    }
-    return number;
-}
-#endif
-
-#if 1
-uint32_t get_number(uint32_t *row, uint32_t *col) {
-    uint32_t number = 0;
-    uint32_t temp = 0;
+    uint32_t count_repeat = 0;
     uint32_t scan_code = get_scan_code();
     while (scan_code != 0x5A) {
         temp = ascii_code(scan_code);
         if (temp != 10) {
-            draw(row, col, '0' + temp);
-            number = number * 10 + temp;
+            if (count_repeat == 1) {
+                count_repeat = 0;
+            } else {    
+                count_repeat += 1;
+                draw(row, col, '0' + temp);
+                number = number * 10 + temp;
+            }
         }
         scan_code = get_scan_code();
-        scan_code = get_scan_code();
-        scan_code = get_scan_code();
     }
+    scan_code = 0;
+    while (scan_code != 0x5A) { scan_code = get_scan_code(); }
+
     return number;
 }
-#endif
 
 uint32_t ascii_code(uint32_t scan_code) {
-    if (scan_code == 0x15) return 0; // 0x45 Q
-    if (scan_code == 0x1D) return 1; // 0x16 W
-    if (scan_code == 0x24) return 2; // 0x1E E
-    if (scan_code == 0x2D) return 3; // 0x26 R
-    if (scan_code == 0x2C) return 4; // 0x25 T
-    if (scan_code == 0x35) return 5; // 0x2E Y
-    if (scan_code == 0x3C) return 6; // 0x36 U
-    if (scan_code == 0x43) return 7; // 0x3D I
-    if (scan_code == 0x44) return 8; // 0x3E O
-    if (scan_code == 0x4D) return 9; // 0x46 P
+    if (scan_code == 0x70) return 0; // 0x45 0
+    if (scan_code == 0x69) return 1; // 0x16 1
+    if (scan_code == 0x72) return 2; // 0x1E 2
+    if (scan_code == 0x7A) return 3; // 0x26 3
+    if (scan_code == 0x6B) return 4; // 0x25 4
+    if (scan_code == 0x73) return 5; // 0x2E 5
+    if (scan_code == 0x74) return 6; // 0x36 6
+    if (scan_code == 0x6C) return 7; // 0x3D 7
+    if (scan_code == 0x75) return 8; // 0x3E 8
+    if (scan_code == 0x7D) return 9; // 0x46 9
     return 10;
 }
 
@@ -174,5 +166,6 @@ void clear() {
 
 void int_handler()
 {
-
+    scan_code_is_unread = 1;
+    scan_code_reg = ps2_ptr->scan_code;
 }
