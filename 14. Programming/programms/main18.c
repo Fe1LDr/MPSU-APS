@@ -20,7 +20,6 @@ void draw(uint32_t *row, uint32_t *col, char c);
 void clear();
 void int_handler();
 
-uint32_t scan_code_reg = 0;
 uint32_t scan_code_is_unread = 0;
 
 int main(int argc, char** argv)
@@ -44,10 +43,13 @@ int main(int argc, char** argv)
 }
 
 uint32_t get_scan_code() {
-    while (!scan_code_is_unread) { }
+    uint32_t wait_cycles = 0;
+    while (!scan_code_is_unread && wait_cycles < 10000) {
+        wait_cycles++;
+    }
     if (scan_code_is_unread) {
         scan_code_is_unread = 0;
-        return scan_code_reg;
+        return ps2_ptr->scan_code;
     } else {
         return 0;
     }
@@ -167,5 +169,4 @@ void clear() {
 void int_handler()
 {
     scan_code_is_unread = 1;
-    scan_code_reg = ps2_ptr->scan_code;
 }

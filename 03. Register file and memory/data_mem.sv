@@ -11,10 +11,8 @@ logic [31:0] reg_data [0:4095];
 
 always_ff @(posedge clk_i) begin
     if (mem_req_i) begin
-        case (write_enable_i)
-            1: reg_data[addr_i[13:2]] <= write_data_i;
-            0: read_data_o <= reg_data[addr_i[13:2]];
-        endcase
+        if (write_enable_i) reg_data[addr_i[13:2]] <= write_data_i;
+        else read_data_o <= reg_data[addr_i[13:2]];
     end
 end
 
